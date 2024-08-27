@@ -25,4 +25,4 @@ python insertPointCloud.py
 
 ## Acknowledgement
 
-This is a fork of [wkentaro/octoma-python](https://github.com/wkentaro/octomap_py) which is a fork of [neka-nat/python-octomap](https://github.com/neka-nat/python-octomap).
+This is a fork of [wkentaro/octomap-python](https://github.com/wkentaro/octomap_py) which is a fork of [neka-nat/python-octomap](https://github.com/neka-nat/python-octomap).
