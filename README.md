@@ -1,18 +1,20 @@
 # octomap_py
 
-[![PyPI Version](https://img.shields.io/pypi/v/octomap-python.svg)](https://pypi.python.org/pypi/octomap-python)
-[![Python Versions](https://img.shields.io/pypi/pyversions/octomap-python.svg)](https://pypi.org/project/octomap-python)Python binding of [the OctoMap library](https://github.com/OctoMap/octomap).
+Python binding of [the OctoMap library](https://github.com/OctoMap/octomap).
+
+[![PyPI Version](https://img.shields.io/pypi/v/octomap_py.svg)](https://pypi.python.org/pypi/octomap_py)
+[![Python Versions](https://img.shields.io/pypi/pyversions/octomap_py.svg)](https://pypi.org/project/octomap_py)
 
 ## Installation
 
 ```bash
-pip install octomap-python
+pip install octomap-py
 ```
 
 ## Example
 
 ```bash
-git clone https://github.com/wkentaro/octomap-python.git && cd octomap-python
+git clone https://github.com/ethanmclark1/octomap_py.git && cd octomap_py
 pip install -e '.[example]'
 
 cd examples
@@ -23,4 +25,4 @@ python insertPointCloud.py
 
 ## Acknowledgement
 
-This is a fork of [wkentaro/octoma-python](https://github.com/wkentaro/octomap-python) which is a fork of [neka-nat/python-octomap](https://github.com/neka-nat/python-octomap).
+This is a fork of [wkentaro/octoma-python](https://github.com/wkentaro/octomap_py) which is a fork of [neka-nat/python-octomap](https://github.com/neka-nat/python-octomap).

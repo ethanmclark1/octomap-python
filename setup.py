@@ -4,23 +4,19 @@ import sys
 from setuptools import Extension
 
 
-# https://github.com/skvark/opencv-python/blob/master/setup.py
 def install_packages(*requirements):
-    # No more convenient way until PEP 518 is implemented;
-    # setuptools only handles eggs
     subprocess.check_call(
         [sys.executable, "-m", "pip", "install"] + list(requirements)
     )
 
 
-# https://github.com/skvark/opencv-python/blob/master/setup.py
 def get_or_install(name, version=None):
-    # Do not import 3rd-party modules into the current process
     import json
     js_packages = json.loads(
         subprocess.check_output(
             [sys.executable, "-m", "pip", "list", "--format", "json"]
-        ).decode('ascii'))  # valid names & versions are ASCII as per PEP 440
+        ).decode('ascii')
+    )
     try:
         [package] = (
             package for package in js_packages if package['name'] == name
@@ -29,6 +25,8 @@ def get_or_install(name, version=None):
         install_packages("%s==%s" % (name, version) if version else name)
         return version
     else:
+        if version and package['version'] != version:
+            install_packages("%s==%s" % (name, version))
         return package['version']
 
 
@@ -39,15 +37,18 @@ def get_long_description():
     try:
         import github2pypi
         return github2pypi.replace_url(
-            slug='wkentaro/octomap-python', content=long_description
+            slug='ethanmclark1/octomap_py', content=long_description
         )
     except Exception:
         return long_description
 
 
 def main():
+    # Ensure a compatible version of NumPy is installed
+    get_or_install('numpy', '1.24.3')  # Using 1.24.3 as an example compatible version
+
+    # Install other build dependencies
     get_or_install('cython')
-    get_or_install('numpy')
     get_or_install('scikit-build')
 
     from Cython.Distutils import build_ext
@@ -80,7 +81,7 @@ def main():
         version="1.8.0.post12",
         author="Blake Narramore",
         author_email="blaque2pi@msn.com",
-        install_requires=["numpy"],
+        install_requires=["numpy>=1.24.3,<1.25.0"],  # Ensuring compatible NumPy version
         extras_require={
             "example": ["glooey", "imgviz>=1.2.0", "pyglet", "trimesh[easy]"],
         },

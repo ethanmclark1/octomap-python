@@ -35,3 +35,5 @@ env/
 /src/octomap/lib/
 
 log
+MANIFEST.in
+octomap/octomap.cpp
