@@ -87,7 +87,7 @@ def main():
         license="BSD",
         maintainer="Blake Narramore, Ethan Clark",
         maintainer_email="blaque2pi@msn.com, eclark715@gmail.com",
-        url="https://github.com/ethanmclark1/octomap-python",
+        url="https://github.com/ethanmclark1/octomap_py",
         description="Python binding of the OctoMap library.",
         long_description=get_long_description(),
         long_description_content_type="text/markdown",
