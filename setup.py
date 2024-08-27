@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import os
 
 from setuptools import Extension
 
@@ -55,6 +56,8 @@ def main():
     import numpy
     import skbuild
 
+    lib_dir = os.path.abspath('src/octomap/lib')
+
     ext_modules = [
         Extension(
             'octomap',
@@ -64,21 +67,21 @@ def main():
                 'src/octomap/dynamicEDT3D/include',
                 numpy.get_include(),
             ],
-            library_dirs=[
-                'src/octomap/lib',
-            ],
+            library_dirs=[lib_dir],
+            runtime_library_dirs=[lib_dir],
             libraries=[
                 'dynamicedt3d',
                 'octomap',
                 'octomath',
             ],
             language='c++',
+            extra_link_args=['-Wl,-rpath,$ORIGIN/../src/octomap/lib']
         )
     ]
 
     skbuild.setup(
         name="octomap_py",
-        version="1.8.0.post12",
+        version="1.8.0.post15",
         author="Blake Narramore",
         author_email="blaque2pi@msn.com",
         install_requires=["numpy>=1.24.3,<1.25.0"],  # Ensuring compatible NumPy version
