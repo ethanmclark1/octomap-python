@@ -215,6 +215,31 @@ class OctreeTestCase(unittest.TestCase):
             octomap.NullPointerException,
             lambda: self.tree.isNodeOccupied(node3),
         )
+        
+    def test_from_msg(self):
+        mock_msg = MockOctomapMsg()
+        
+        try:
+            octree = octomap.OcTree.from_msg(mock_msg)
+            self.assertIsNotNone(octree)
+            self.assertEqual(octree.getResolution(), 0.1)
+            
+            # Test occupied voxels
+            center_node = octree.search([0.15, 0.15, 0.15])
+            corner_node = octree.search([0.05, 0.05, 0.05])
+            empty_node = octree.search([0.25, 0.25, 0.25])
+
+            self.assertTrue(octree.isNodeOccupied(center_node))
+            self.assertTrue(octree.isNodeOccupied(corner_node))
+            self.assertFalse(octree.isNodeOccupied(empty_node))
+
+            # Additional checks
+            self.assertGreater(octree.getNumLeafNodes(), 0)
+            self.assertGreater(octree.getTreeDepth(), 0)
+            self.assertGreater(octree.size(), 0)
+
+        except Exception as e:
+            self.fail(f"Error creating OcTree from mock message: {e}")
 
 
 if __name__ == "__main__":
