@@ -1,5 +1,17 @@
 from libcpp cimport bool
 from libcpp.string cimport string
+from libcpp.vector cimport vector
+from libc.stdint cimport int8_t, uint64_t
+
+cdef extern from "<bitset>" namespace "std":
+    cdef cppclass bitset[N]:
+        bitset() except +
+        bitset(uint64_t val) except +
+        bool operator[](size_t pos)
+
+cdef extern from "octomap/AbstractOcTree.h" namespace "octomap":
+    cdef cppclass AbstractOcTree:
+        pass       
 
 cdef extern from * nogil:
     cdef T dynamic_cast[T](void *) except +   # nullptr may also indicate failure
@@ -51,6 +63,7 @@ cdef extern from "octomap/OcTreeNode.h" namespace "octomap":
         double getOccupancy()
         OcTreeNode* getChild(unsigned int i)
         float getLogOdds()
+        float getMaxChildLogOdds()
         void setLogOdds(float l)
         bool hasChildren()
 
@@ -98,7 +111,6 @@ cdef extern from "include_and_setting.h" namespace "octomap":
             bool operator==(leaf_bbx_iterator &other)
             bool operator!=(leaf_bbx_iterator &other)
 
-cdef extern from "include_and_setting.h" namespace "octomap":
     cdef cppclass OcTree:
         OcTree(double resolution) except +
         OcTree(string _filename) except +
@@ -114,6 +126,8 @@ cdef extern from "include_and_setting.h" namespace "octomap":
         bool deleteNode(point3d& value, unsigned int depth)
         bool castRay(point3d& origin, point3d& direction, point3d& end,
                      bool ignoreUnknownCells, double maxRange)
+        istream& readBinaryData(istream& s)
+        istream& readBinaryNode(istream& s, OcTreeNode* node)
         OcTree* read(string& filename)
         OcTree* read(istream& s)
         bool write(string& filename)
@@ -137,6 +151,10 @@ cdef extern from "include_and_setting.h" namespace "octomap":
         point3d getBBXMax()
         point3d getBBXMin()
         OcTreeNode* getRoot()
+        void setRoot(OcTreeNode* root)
+        bool nodeChildExists(OcTreeNode* node, unsigned int childIdx)
+        OcTreeNode* createNodeChild(OcTreeNode* node, unsigned int childIdx)
+        OcTreeNode* getNodeChild(OcTreeNode* node, unsigned int childIdx)
         size_t getNumLeafNodes()
         double getResolution()
         unsigned int getTreeDepth()
@@ -187,8 +205,14 @@ cdef extern from "include_and_setting.h" namespace "octomap":
         void getMetricMax(double& x, double& y, double& z)
 
         void expandNode(OcTreeNode* node)
-        OcTreeNode* createNodeChild(OcTreeNode *node, unsigned int childIdx)
-        OcTreeNode* getNodeChild(OcTreeNode *node, unsigned int childIdx)
         bool isNodeCollapsible(const OcTreeNode* node)
         void deleteNodeChild(OcTreeNode *node, unsigned int childIdx)
         bool pruneNode(OcTreeNode *node)
+        
+        AbstractOcTree* binaryMsgToMap(const OctomapMsg& msg)
+
+cdef struct OctomapMsg:
+    double resolution
+    string id
+    bint binary
+    vector[int8_t] data

@@ -1,6 +1,8 @@
 from libcpp.string cimport string
 from libcpp cimport bool as cppbool
 from libc.string cimport memcpy
+from libcpp.vector cimport vector
+from libc.stdint cimport int8_t
 from cython.operator cimport dereference as deref, preincrement as inc, address
 cimport octomap_defs as defs
 cimport dynamicEDT3D_defs as edt
@@ -88,6 +90,11 @@ cdef class OcTreeNode:
     def getLogOdds(self):
         if self.thisptr:
             return self.thisptr.getLogOdds()
+        else:
+            raise NullPointerException
+    def getMaxChildLogOdds(self):
+        if self.thisptr:
+            return self.thisptr.getMaxChildLogOdds()
         else:
             raise NullPointerException
     def setLogOdds(self, float l):
@@ -433,6 +440,16 @@ cdef class OcTree:
                 return oss.str().c_str()[:oss.str().length()]
             else:
                 return False
+
+    def readBinaryData(self, bytes data):
+        cdef defs.istringstream iss
+        iss.str(string(<char*>data, len(data)))
+        self.thisptr.readBinaryData(<defs.istream&>iss)
+
+    def readBinaryNode(self, OcTreeNode node, bytes data):
+        cdef defs.istringstream iss
+        iss.str(string(<char*>data, len(data)))
+        self.thisptr.readBinaryNode(<defs.istream&>iss, node.thisptr)
 
     def readBinary(self, filename):
         cdef defs.istringstream iss
@@ -858,15 +875,18 @@ cdef class OcTree:
     def expandNode(self, node):
         self.thisptr.expandNode((<OcTreeNode>node).thisptr)
 
-    def createNodeChild(self, node, int idx):
+    def createNodeChild(self, OcTreeNode node, unsigned int idx):
         child = OcTreeNode()
-        child.thisptr = self.thisptr.createNodeChild((<OcTreeNode>node).thisptr, idx)
+        child.thisptr = self.thisptr.createNodeChild(node.thisptr, idx)
         return child
 
-    def getNodeChild(self, node, int idx):
+    def getNodeChild(self, OcTreeNode node, unsigned int idx):
         child = OcTreeNode()
-        child.thisptr = self.thisptr.getNodeChild((<OcTreeNode>node).thisptr, idx)
+        child.thisptr = self.thisptr.getNodeChild(node.thisptr, idx)
         return child
+
+    def nodeChildExists(self, OcTreeNode node, unsigned int childIdx):
+        return self.thisptr.nodeChildExists(node.thisptr, childIdx)
 
     def isNodeCollapsible(self, node):
         return self.thisptr.isNodeCollapsible((<OcTreeNode>node).thisptr)
@@ -917,3 +937,22 @@ cdef class OcTree:
                                                            <float?>p[2]))
         else:
             raise NullPointerException
+
+# TODO: Fix this
+def binaryMsgToMap(double resolution, bytes id, bint binary, bytes data):
+    cdef defs.OctomapMsg msg
+    msg.resolution = resolution
+    msg.id = string(<char*>id)
+    msg.binary = binary
+    msg.data = vector[int8_t](<int8_t*>data, <int8_t*>data + len(data))
+    
+    cdef defs.AbstractOcTree* tree_ptr = defs.binaryMsgToMap(msg)
+    
+    if tree_ptr == NULL:
+        return None
+    
+    cdef OcTree tree = OcTree(resolution)
+    del tree.thisptr
+    tree.thisptr = <defs.OcTree*>tree_ptr
+    
+    return tree
