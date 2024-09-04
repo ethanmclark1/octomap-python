@@ -92,7 +92,7 @@ def main():
         maintainer="Ethan Clark",
         maintainer_email="eclark715@gmail.com",
         url="https://github.com/ethanmclark1/octomap_ros",
-        description="Python binding of the OctoMap library.",
+        description="Python binding of the OctoMap library to integrate with ROS2 ",
         long_description=get_long_description(),
         long_description_content_type="text/markdown",
         classifiers=[
