@@ -1,3 +1,5 @@
+# cython: language_level=3
+
 from libcpp.string cimport string
 from libcpp cimport bool as cppbool
 from libc.string cimport memcpy
@@ -19,6 +21,7 @@ class NullPointerException(Exception):
     """
     def __init__(self):
         pass
+        
 
 cdef class OcTreeKey:
     """
@@ -441,16 +444,6 @@ cdef class OcTree:
             else:
                 return False
 
-    def readBinaryData(self, bytes data):
-        cdef defs.istringstream iss
-        iss.str(string(<char*>data, len(data)))
-        self.thisptr.readBinaryData(<defs.istream&>iss)
-
-    def readBinaryNode(self, OcTreeNode node, bytes data):
-        cdef defs.istringstream iss
-        iss.str(string(<char*>data, len(data)))
-        self.thisptr.readBinaryNode(<defs.istream&>iss, node.thisptr)
-
     def readBinary(self, filename):
         cdef defs.istringstream iss
         if filename.startswith(b"# Octomap OcTree binary file"):
@@ -469,6 +462,16 @@ cdef class OcTree:
                 return oss.str().c_str()[:oss.str().length()]
             else:
                 return False
+
+    def readBinaryData(self, bytes data):
+        cdef defs.istringstream iss
+        iss.str(string(<char*>data, len(data)))
+        self.thisptr.readBinaryData(<defs.istream&>iss)
+
+    def readBinaryNode(self, OcTreeNode node, bytes data):
+        cdef defs.istringstream iss
+        iss.str(string(<char*>data, len(data)))
+        self.thisptr.readBinaryNode(<defs.istream&>iss, node.thisptr)
 
     def isNodeOccupied(self, node):
         if isinstance(node, OcTreeNode):
@@ -938,21 +941,41 @@ cdef class OcTree:
         else:
             raise NullPointerException
 
-# TODO: Fix this
-def binaryMsgToMap(double resolution, bytes id, bint binary, bytes data):
-    cdef defs.OctomapMsg msg
-    msg.resolution = resolution
-    msg.id = string(<char*>id)
-    msg.binary = binary
-    msg.data = vector[int8_t](<int8_t*>data, <int8_t*>data + len(data))
+    @staticmethod
+    def binaryMsgToMap(double resolution, bytes id, bint binary, bytes data):
+        cdef defs.OctomapMsg msg
+        cdef vector[int8_t] data_vector
+        cdef unsigned char* data_ptr
+        
+        msg.resolution = resolution
+        msg.id = string(<char*>id)
+        msg.binary = binary
+        
+        # Convert bytes to vector[int8_t]
+        data_ptr = data
+        data_vector.assign(<int8_t*>data_ptr, <int8_t*>(data_ptr + len(data)))
+        msg.data = data_vector
+
+        cdef defs.AbstractOcTree* tree_ptr = binaryMsgToMap(msg)
+        
+        if tree_ptr == NULL:
+            return None
+        
+        cdef OcTree tree = OcTree.__new__(OcTree, 0.1) # Dummy resolution
+        tree.thisptr = <defs.OcTree*>tree_ptr
+        return tree
+
+cdef defs.AbstractOcTree* binaryMsgToMap(const defs.OctomapMsg& msg):
+    cdef defs.OcTree* octree
+    cdef defs.istringstream iss
+
+    if not msg.binary:
+        return NULL
+
+    octree = new defs.OcTree(msg.resolution)
     
-    cdef defs.AbstractOcTree* tree_ptr = defs.binaryMsgToMap(msg)
-    
-    if tree_ptr == NULL:
-        return None
-    
-    cdef OcTree tree = OcTree(resolution)
-    del tree.thisptr
-    tree.thisptr = <defs.OcTree*>tree_ptr
-    
-    return tree
+    if msg.data.size() > 0:
+        iss.str(string(<char*>&msg.data[0], msg.data.size()))
+        octree.readBinaryData(<defs.istream&>iss)
+
+    return <defs.AbstractOcTree*>octree

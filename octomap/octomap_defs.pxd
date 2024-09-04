@@ -9,10 +9,6 @@ cdef extern from "<bitset>" namespace "std":
         bitset(uint64_t val) except +
         bool operator[](size_t pos)
 
-cdef extern from "octomap/AbstractOcTree.h" namespace "octomap":
-    cdef cppclass AbstractOcTree:
-        pass       
-
 cdef extern from * nogil:
     cdef T dynamic_cast[T](void *) except +   # nullptr may also indicate failure
     cdef T static_cast[T](void *)
@@ -34,6 +30,10 @@ cdef extern from "<sstream>" namespace "std":
     cdef cppclass ostringstream:
         ostringstream() except +
         string str()
+
+cdef extern from "octomap/AbstractOcTree.h" namespace "octomap":
+    cdef cppclass AbstractOcTree:
+        pass       
 
 cdef extern from "octomap/math/Vector3.h" namespace "octomath":
     cdef cppclass Vector3:
@@ -126,16 +126,17 @@ cdef extern from "include_and_setting.h" namespace "octomap":
         bool deleteNode(point3d& value, unsigned int depth)
         bool castRay(point3d& origin, point3d& direction, point3d& end,
                      bool ignoreUnknownCells, double maxRange)
-        istream& readBinaryData(istream& s)
-        istream& readBinaryNode(istream& s, OcTreeNode* node)
         OcTree* read(string& filename)
         OcTree* read(istream& s)
         bool write(string& filename)
         bool write(ostream& s)
+        void readTree(const OctomapMsg& msg)
         bool readBinary(string& filename)
         bool readBinary(istream& s)
         bool writeBinary(string& filename)
         bool writeBinary(ostream& s)
+        istream& readBinaryData(istream& s)
+        istream& readBinaryNode(istream& s, OcTreeNode* node)
         bool isNodeOccupied(OcTreeNode& occupancyNode)
         bool isNodeAtThreshold(OcTreeNode& occupancyNode)
         void insertPointCloud(Pointcloud& scan, point3d& sensor_origin,
@@ -208,7 +209,7 @@ cdef extern from "include_and_setting.h" namespace "octomap":
         bool isNodeCollapsible(const OcTreeNode* node)
         void deleteNodeChild(OcTreeNode *node, unsigned int childIdx)
         bool pruneNode(OcTreeNode *node)
-        
+        @staticmethod
         AbstractOcTree* binaryMsgToMap(const OctomapMsg& msg)
 
 cdef struct OctomapMsg:

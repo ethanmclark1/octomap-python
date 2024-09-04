@@ -81,16 +81,16 @@ def main():
 
     skbuild.setup(
         name="octomap_ros",
-        version="1.8.1",
-        author="Blake Narramore",
-        author_email="blaque2pi@msn.com",
+        version="1.8.2",
+        author="Ethan Clark, Blake Narramore",
+        author_email="eclark715@gmail.com, blaque2pi@msn.com",
         install_requires=["numpy>=1.24.3,<1.25.0"],  # Ensuring compatible NumPy version
         extras_require={
             "example": ["glooey", "imgviz>=1.2.0", "pyglet", "trimesh[easy]"],
         },
         license="BSD",
-        maintainer="Blake Narramore, Ethan Clark",
-        maintainer_email="blaque2pi@msn.com, eclark715@gmail.com",
+        maintainer="Ethan Clark",
+        maintainer_email="eclark715@gmail.com",
         url="https://github.com/ethanmclark1/octomap_ros",
         description="Python binding of the OctoMap library.",
         long_description=get_long_description(),
