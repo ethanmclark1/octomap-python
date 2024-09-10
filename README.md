@@ -35,6 +35,10 @@ pip install octomap-ros
 * C++ compiler: `sudo apt-get install build-essential`
 * CMake: `sudo apt-get install cmake`
 
+### Difference from Other Packages
+
+The key difference between ``octomap_ros`` and other packages is that **it provides the capability to convert OctoMap messages in ROS to OctoMap OcTrees**. This is crucial for ROS 2 users, as the existing ``octomap_msgs`` has not been fully ported over to ROS 2, leaving a gap in functionality. ``octomap_ros`` fills this void, allowing ROS 2 users to directly work with OctoMap data in the form of OcTrees, which is essential for most mapping and occupancy grid operations.
+
 ## ROS Humble Usage
 
 Here's a basic example of how to use OctoMap with ROS Humble:
